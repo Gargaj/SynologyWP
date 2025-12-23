@@ -26,6 +26,8 @@ namespace SynologyWP.Pages
       if (result != null)
       {
         _app.Client.SetEndpoints(result);
+        AudioPivot.Visibility = _app.Client.HasEndpoint("SYNO.AudioStation.Artist") ? Visibility.Visible : Visibility.Collapsed;
+        PhotosPivot.Visibility = _app.Client.HasEndpoint("SYNO.FotoTeam.Browse.Timeline") ? Visibility.Visible : Visibility.Collapsed;
       }
     }
 

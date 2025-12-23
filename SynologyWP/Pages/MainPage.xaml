@@ -25,7 +25,7 @@
       </PivotItem>
 
       <!-- Audio -->
-      <PivotItem>
+      <PivotItem x:Name="AudioPivot">
         <PivotItem.Header>
           <TextBlock Text="Audio"/>
         </PivotItem.Header>
@@ -33,7 +33,7 @@
       </PivotItem>
 
       <!-- Audio -->
-      <PivotItem>
+      <PivotItem x:Name="PhotosPivot">
         <PivotItem.Header>
           <TextBlock Text="Photos"/>
         </PivotItem.Header>

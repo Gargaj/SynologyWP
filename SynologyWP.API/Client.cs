@@ -75,6 +75,11 @@ namespace SynologyWP.API
       _endpoints = endpoints;
     }
 
+    public bool HasEndpoint(string endpoint)
+    {
+      return _endpoints.ContainsKey(endpoint);
+    }
+
     public async Task<T> GetAsync<T>(ICommand input) where T : IResult
     {
       return await RequestAsync<T>("GET", input);
