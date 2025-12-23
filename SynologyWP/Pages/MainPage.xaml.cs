@@ -31,19 +31,19 @@ namespace SynologyWP.Pages
 
     private async void Main_PivotItemLoading(Pivot sender, PivotItemEventArgs args)
     {
-      var filesInlay = args.Item.ContentTemplateRoot as Inlays.FilesInlay;
-      if (filesInlay != null)
+      var inlay = args.Item.ContentTemplateRoot as Inlays.IInlay;
+      if (inlay != null)
       {
-        await filesInlay.Refresh();
+        await inlay.Refresh();
       }
     }
 
     private void Main_PivotItemUnloading(Pivot sender, PivotItemEventArgs args)
     {
-      var filesInlay = args.Item.ContentTemplateRoot as Inlays.FilesInlay;
-      if (filesInlay != null)
+      var inlay = args.Item.ContentTemplateRoot as Inlays.IInlay;
+      if (inlay != null)
       {
-        filesInlay.Flush();
+        inlay.Flush();
       }
     }
 

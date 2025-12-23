@@ -9,7 +9,7 @@ using Windows.UI.Xaml.Controls;
 
 namespace SynologyWP.Inlays
 {
-  public partial class FilesInlay : UserControl, INotifyPropertyChanged
+  public partial class FilesInlay : UserControl, INotifyPropertyChanged, IInlay
   {
     private App _app;
     private Pages.MainPage _mainPage;

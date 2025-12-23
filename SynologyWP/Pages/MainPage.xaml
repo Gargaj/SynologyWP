@@ -29,6 +29,15 @@
         <PivotItem.Header>
           <TextBlock Text="Audio"/>
         </PivotItem.Header>
+        <inlays:AudioInlay x:Name="AudioInlay"/>
+      </PivotItem>
+
+      <!-- Audio -->
+      <PivotItem>
+        <PivotItem.Header>
+          <TextBlock Text="Photos"/>
+        </PivotItem.Header>
+        <inlays:PhotosInlay x:Name="PhotosInlay"/>
       </PivotItem>
   
     </Pivot>

@@ -124,7 +124,10 @@
     <Compile Include="CommandResult.cs" />
     <Compile Include="Commands\SYNO\API\Auth.cs" />
     <Compile Include="Commands\SYNO\API\Info.cs" />
+    <Compile Include="Commands\SYNO\AudioStation\Artist.cs" />
+    <Compile Include="Commands\SYNO\AudioStation\Album.cs" />
     <Compile Include="Commands\SYNO\FileStation\List.cs" />
+    <Compile Include="Commands\SYNO\FotoTeam\Browse\Timeline.cs" />
     <Compile Include="HTTP.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

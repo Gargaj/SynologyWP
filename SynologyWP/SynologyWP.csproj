@@ -120,6 +120,13 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Inlays\IInlay.cs" />
+    <Compile Include="Inlays\PhotosInlay.xaml.cs">
+      <DependentUpon>PhotosInlay.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Inlays\AudioInlay.xaml.cs">
+      <DependentUpon>AudioInlay.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Inlays\FilesInlay.xaml.cs">
       <DependentUpon>FilesInlay.xaml</DependentUpon>
     </Compile>
@@ -167,6 +174,14 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Inlays\PhotosInlay.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Inlays\AudioInlay.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Inlays\FilesInlay.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
