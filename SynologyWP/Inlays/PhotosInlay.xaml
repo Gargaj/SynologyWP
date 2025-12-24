@@ -11,18 +11,56 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
   <Grid>
-    <ListView ItemsSource="{Binding Entries}" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch">
-      <ListView.ItemContainerStyle>
-        <Style TargetType="ListViewItem">
-          <Setter Property="Padding" Value="4"/>
-          <Setter Property="Margin" Value="0,4,0,0"/>
-          <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-        </Style>
-      </ListView.ItemContainerStyle>
-      <ListView.ItemTemplate>
-        <DataTemplate>
-        </DataTemplate>
-      </ListView.ItemTemplate>
-    </ListView>
+
+    <Grid.Resources>
+      <CollectionViewSource x:Name="groupedPhotosByMonth" IsSourceGrouped="True"/>
+    </Grid.Resources>
+
+    <SemanticZoom IsZoomOutButtonEnabled="True" ScrollViewer.ZoomMode="Enabled">
+      <SemanticZoom.ZoomedOutView>
+        <GridView x:Name="Months" SelectionMode="None" HorizontalAlignment="Center" Padding="0">
+          <GridView.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding Group.Key}" Width="96" FontSize="22" Margin="15" Foreground="{ThemeResource SystemControlHighlightAccentBrush}" TextAlignment="Center"/>
+            </DataTemplate>
+          </GridView.ItemTemplate>
+          <GridView.ItemsPanel>
+            <ItemsPanelTemplate>
+              <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3"/>
+            </ItemsPanelTemplate>
+          </GridView.ItemsPanel>
+        </GridView>
+      </SemanticZoom.ZoomedOutView>
+      <SemanticZoom.ZoomedInView>
+        <GridView ItemsSource="{Binding Source={StaticResource groupedPhotosByMonth}}" HorizontalAlignment="Center">
+
+          <GridView.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Vertical" Margin="5,5">
+                <Image Width="80" Height="80">
+                  <Image.Source>
+                    <BitmapImage UriSource="{Binding ImageURL}"/>
+                  </Image.Source>
+                </Image>
+              </StackPanel>
+            </DataTemplate>
+          </GridView.ItemTemplate>
+
+          <GridView.GroupStyle>
+            <GroupStyle HidesIfEmpty="True">
+              <GroupStyle.HeaderTemplate>
+                <DataTemplate>
+                  <Grid Margin="0">
+                    <TextBlock Text="{Binding Key}" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"/>
+                  </Grid>
+                </DataTemplate>
+              </GroupStyle.HeaderTemplate>
+            </GroupStyle>
+          </GridView.GroupStyle>
+
+        </GridView>
+      </SemanticZoom.ZoomedInView>
+    </SemanticZoom>
+
   </Grid>
 </UserControl>

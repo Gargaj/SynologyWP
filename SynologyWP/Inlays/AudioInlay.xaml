@@ -15,7 +15,7 @@
       <CollectionViewSource x:Name="groupedArtists" IsSourceGrouped="True"/>
     </Grid.Resources>
     
-    <SemanticZoom x:Name="SemanticZoomAuthors" IsZoomOutButtonEnabled="True" ScrollViewer.ZoomMode="Enabled">
+    <SemanticZoom IsZoomOutButtonEnabled="True" ScrollViewer.ZoomMode="Enabled">
       <SemanticZoom.ZoomedOutView>
         <GridView x:Name="ArtistsKeys" SelectionMode="None" HorizontalAlignment="Center" Padding="0">
           <GridView.ItemTemplate>
@@ -61,5 +61,6 @@
         </GridView>
       </SemanticZoom.ZoomedInView>
     </SemanticZoom>
+
   </Grid>
 </UserControl>

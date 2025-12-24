@@ -9,14 +9,11 @@ namespace SynologyWP.API
   public class Settings
   {
     private const string _settingsFilename = "settings.dat";
-    private string _selectedDID;
     private Credential _credential = new Credential();
 
     public Settings()
     {
     }
-
-    public string SelectedDID { get => _selectedDID; set => _selectedDID = value; }
 
     public Credential CurrentCredential => _credential;
 

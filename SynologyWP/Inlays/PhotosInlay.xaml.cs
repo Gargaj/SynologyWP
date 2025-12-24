@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net;
@@ -13,6 +12,9 @@ namespace SynologyWP.Inlays
   {
     private App _app;
     private Pages.MainPage _mainPage;
+    private API.Commands.SYNO.FotoTeam.Browse.TimelineGetResult _timeline;
+    private API.Commands.SYNO.FotoTeam.Search.FilterListResult _filter;
+    private List<API.Commands.SYNO.FotoTeam.Browse.Entry> _entryList;
 
     public PhotosInlay()
     {
@@ -29,16 +31,63 @@ namespace SynologyWP.Inlays
 
     public void Flush()
     {
+      _entryList.Clear();
     }
 
     public async Task Refresh()
     {
       _mainPage?.StartLoading();
 
-      var result = await _app.Client.GetAsync<API.Commands.SYNO.FotoTeam.Browse.TimelineGetResult>(new API.Commands.SYNO.FotoTeam.Browse.TimelineGet()
+      _timeline = await _app.Client.GetAsync<API.Commands.SYNO.FotoTeam.Browse.TimelineGetResult>(new API.Commands.SYNO.FotoTeam.Browse.TimelineGet()
       {
         timeline_group_unit = "day"
       });
+      _filter = await _app.Client.GetAsync<API.Commands.SYNO.FotoTeam.Search.FilterListResult>(new API.Commands.SYNO.FotoTeam.Search.FilterList()
+      {
+        additional = "[\"thumbnail\"]",
+        setting = "{\"item_type\":true,\"time\":true,\"geocoding\":true}",
+      });
+
+      _mainPage?.EndLoading();
+
+      _entryList = new List<API.Commands.SYNO.FotoTeam.Browse.Entry>();
+      for (int i = 0; i < 3; i++)
+      {
+        foreach (var item in _timeline.section[i].list)
+        {
+          LoadSection(item);
+        }
+      }
+    }
+
+    private async void LoadSection(API.Commands.SYNO.FotoTeam.Browse.Item sectionItem)
+    {
+      _mainPage?.StartLoading();
+
+      var time = _filter.time.First(s => s.year == sectionItem.year && s.month == sectionItem.month);
+
+      var items = await _app.Client.GetAsync<API.Commands.SYNO.FotoTeam.Browse.ItemListResult>(new API.Commands.SYNO.FotoTeam.Browse.ItemList()
+      {
+        offset = 0,
+        limit = sectionItem.item_count,
+        start_time = time.start_time,
+        end_time = time.end_time,
+        additional = "[\"thumbnail\"]",
+      });
+
+      _entryList.AddRange(items.list);
+
+      groupedPhotosByMonth.Source = _entryList
+        .Select(s => new Photo(_app.Client)
+        {
+          ID = s.id,
+          Name = s.filename,
+          Month = API.Helpers.UnixTimeStampToDateTime(s.time).ToLocalTime().ToString("yyyy-MM"),
+          CacheKey = s.additional.thumbnail.cache_key,
+        })
+        .GroupBy(s => s.Month)
+        .OrderByDescending(s => s.Key);
+      Months.ItemsSource = groupedPhotosByMonth.View.CollectionGroups;
 
       _mainPage?.EndLoading();
     }
@@ -52,6 +101,36 @@ namespace SynologyWP.Inlays
     protected virtual void OnPropertyChanged(string propertyName)
     {
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public class Photo
+    {
+      API.Client _client;
+
+      public Photo(API.Client client) { _client = client; }
+      public int ID { get; set; }
+      public string Name { get; set; }
+      public string Month { get; set; }
+      public string CacheKey { get; set; }
+      public string ImageURL
+      {
+        get
+        {
+          var url = _client.Settings.CurrentCredential.URL;
+          url += "/synofoto/api/v2/t/Thumbnail/get";
+
+          var queryParams = new System.Collections.Specialized.NameValueCollection();
+          queryParams.Add("type", "unit");
+          queryParams.Add("size", "sm");
+          queryParams.Add("id", ID.ToString());
+          queryParams.Add("cache_key", CacheKey);
+          queryParams.Add("_sid", _client.Settings.CurrentCredential.SID);
+
+          url += "?" + string.Join("&", queryParams.AllKeys.Select(s => $"{s}={WebUtility.UrlEncode(queryParams.GetValues(s)[0])}"));
+          url = url.Replace("+", "%20"); // Synology quirk
+          return url;
+        }
+      }
     }
   }
 }
