@@ -11,7 +11,14 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
   <Grid>
-    <ListView ItemsSource="{Binding Entries}" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="36"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Border Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource SystemColorActiveCaptionBrush}">
+      <TextBlock Text="{Binding CurrentPath}" FontSize="20" Margin="0,6,0,0"/>
+    </Border>
+    <ListView Grid.Row="1" ItemsSource="{Binding Entries}" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch">
       <ListView.ItemContainerStyle>
         <Style TargetType="ListViewItem">
           <Setter Property="Padding" Value="4"/>
@@ -21,7 +28,7 @@
       </ListView.ItemContainerStyle>
       <ListView.ItemTemplate>
         <DataTemplate>
-          <Button Click="Button_Click"  Background="Transparent" HorizontalAlignment="Stretch">
+          <Button Click="Entry_Click"  Background="Transparent" HorizontalAlignment="Stretch">
             <Button.Template>
               <ControlTemplate>
                 <Grid>
@@ -32,11 +39,28 @@
                   </Grid.ColumnDefinitions>
                   <FontIcon Grid.Column="0" Margin="0,0,5,0" Glyph="{Binding Icon}" FontSize="24" />
                   <StackPanel Grid.Column="1" Orientation="Vertical">
-                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="18"/>
-                    <TextBlock Text="{Binding Info}" FontSize="12"/>
+                    <TextBlock Text="{Binding Name}" FontSize="18"/>
+                    <TextBlock Text="{Binding Info}" FontSize="12" Foreground="{ThemeResource SystemColorGrayTextBrush}"/>
                   </StackPanel>
-                  <Button Grid.Column="2" Margin="5,0,0,0">
+                  <Button Grid.Column="2" Margin="5,0,0,0" Click="FileMenu_Click">
+                    <i:Interaction.Behaviors>
+                      <c:DataTriggerBehavior Binding="{Binding IsDirectory}" Value="False">
+                        <c:ChangePropertyAction PropertyName="Visibility" Value="Visible" />
+                      </c:DataTriggerBehavior>
+                      <c:DataTriggerBehavior Binding="{Binding IsDirectory}" Value="True">
+                        <c:ChangePropertyAction PropertyName="Visibility" Value="Collapsed" />
+                      </c:DataTriggerBehavior>
+                    </i:Interaction.Behaviors>
                     <FontIcon Glyph="&#xE712;"/>
+                    <FlyoutBase.AttachedFlyout>
+                      <MenuFlyout>
+                        <MenuFlyoutItem Text="Download" Click="Download_Click">
+                          <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE896;" />
+                          </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                      </MenuFlyout>
+                    </FlyoutBase.AttachedFlyout>
                   </Button>
                 </Grid>
               </ControlTemplate>

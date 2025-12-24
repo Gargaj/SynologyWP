@@ -127,6 +127,7 @@
     <Compile Include="Commands\SYNO\AudioStation\Cover.cs" />
     <Compile Include="Commands\SYNO\AudioStation\Artist.cs" />
     <Compile Include="Commands\SYNO\AudioStation\Album.cs" />
+    <Compile Include="Commands\SYNO\FileStation\Download.cs" />
     <Compile Include="Commands\SYNO\FileStation\List.cs" />
     <Compile Include="Commands\SYNO\FotoTeam\Browse\Item.cs" />
     <Compile Include="Commands\SYNO\FotoTeam\Browse\Timeline.cs" />

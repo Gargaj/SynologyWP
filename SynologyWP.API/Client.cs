@@ -149,5 +149,12 @@ namespace SynologyWP.API
       var result = Newtonsoft.Json.JsonConvert.DeserializeObject<CommandResult<T>>(responseJson, _deserializerSettings);
       return result.data;
     }
+
+    public async Task<System.IO.MemoryStream> Download(ICommand input)
+    {
+      var http = new HTTP();
+      var url = RequestToGETQuery(input);
+      return await http.DoHTTPRequestStreamAsync(url, new byte[] { }, null, "GET");
+    }
   }
 }
