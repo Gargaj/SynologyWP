@@ -42,7 +42,7 @@
                     <BitmapImage UriSource="{Binding ImageURLThumb}"/>
                   </Image.Source>
                 </Image>
-                <Canvas Canvas.Top="0" Canvas.Left="0" Width="70" Height="70">
+                <Canvas Canvas.Top="0" Canvas.Left="0" Width="70" Height="70" IsHitTestVisible="False">
                   <i:Interaction.Behaviors>
                     <c:DataTriggerBehavior Binding="{Binding IsVideo}" Value="True">
                       <c:ChangePropertyAction PropertyName="Visibility" Value="Visible" />

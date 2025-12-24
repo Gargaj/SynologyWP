@@ -130,6 +130,7 @@
     <Compile Include="Commands\SYNO\FileStation\List.cs" />
     <Compile Include="Commands\SYNO\FotoTeam\Browse\Item.cs" />
     <Compile Include="Commands\SYNO\FotoTeam\Browse\Timeline.cs" />
+    <Compile Include="Commands\SYNO\FotoTeam\Download.cs" />
     <Compile Include="Commands\SYNO\FotoTeam\Search\Filter.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="HTTP.cs" />

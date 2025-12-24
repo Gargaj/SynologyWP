@@ -8,6 +8,7 @@ namespace SynologyWP.Pages
   {
     private App _app;
     private uint _isLoading = 0;
+    private string _videoPlayerURL;
     private string _zoomedImageURL;
 
     public MainPage()
@@ -47,6 +48,41 @@ namespace SynologyWP.Pages
     private void CloseZoomedImage_Click(object sender, RoutedEventArgs e)
     {
       ZoomedImageURL = null;
+    }
+
+    public string VideoPlayerURL
+    {
+      get => _videoPlayerURL;
+      set
+      {
+        _videoPlayerURL = value;
+
+        mediaPlayer.MediaPlayer.Source = string.IsNullOrEmpty(VideoPlayerURL) ? null : Windows.Media.Core.MediaSource.CreateFromUri(new System.Uri(VideoPlayerURL));
+        if (!string.IsNullOrEmpty(VideoPlayerURL))
+        {
+          mediaPlayer.MediaPlayer.Play();
+        }
+
+        OnPropertyChanged(nameof(VideoPlayerURL));
+        OnPropertyChanged(nameof(IsVideoPlayerValid));
+      }
+    }
+    public bool IsVideoPlayerValid => !string.IsNullOrEmpty(VideoPlayerURL);
+
+    protected void VideoPlayer_Loaded(object sender, RoutedEventArgs e)
+    {
+      var mp = sender as MediaPlayerElement;
+      if (mp == null)
+      {
+        return;
+      }
+
+      mp.SetMediaPlayer(new Windows.Media.Playback.MediaPlayer());
+    }
+
+    private void CloseVideoPlayer_Click(object sender, RoutedEventArgs e)
+    {
+      VideoPlayerURL = null;
     }
 
     private async void Main_PivotItemLoading(Pivot sender, PivotItemEventArgs args)

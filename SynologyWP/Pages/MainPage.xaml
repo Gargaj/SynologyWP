@@ -45,7 +45,6 @@
     <!-- modals -->
     <Canvas x:Name="RootCanvas">
 
-
       <!-- image viewer -->
       <Grid Width="{Binding ActualWidth, ElementName=RootCanvas}" 
             Height="{Binding ActualHeight, ElementName=RootCanvas}"
@@ -75,6 +74,35 @@
               </ScrollViewer>
             </Grid>
             <Button Click="CloseZoomedImage_Click" Margin="5" Padding="5,3" Background="Black" Foreground="White">
+              <FontIcon Glyph="&#xE711;" FontSize="20"/>
+            </Button>
+          </Canvas>
+        </Border>
+      </Grid>
+      
+      <!-- video player -->
+      <Grid Width="{Binding ActualWidth, ElementName=RootCanvas}" 
+            Height="{Binding ActualHeight, ElementName=RootCanvas}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Canvas.ZIndex="5">
+        <Border Background="#CC000000">
+          <i:Interaction.Behaviors>
+            <c:DataTriggerBehavior Binding="{Binding IsVideoPlayerValid}" Value="True">
+              <c:ChangePropertyAction PropertyName="Visibility" Value="Visible" />
+            </c:DataTriggerBehavior>
+            <c:DataTriggerBehavior Binding="{Binding IsVideoPlayerValid}" Value="False">
+              <c:ChangePropertyAction PropertyName="Visibility" Value="Collapsed" />
+            </c:DataTriggerBehavior>
+          </i:Interaction.Behaviors>
+          <Canvas>
+            <Grid Width="{Binding ActualWidth, ElementName=RootCanvas}" 
+                  Height="{Binding ActualHeight, ElementName=RootCanvas}"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center">
+              <MediaPlayerElement x:Name="mediaPlayer" Loaded="VideoPlayer_Loaded" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AreTransportControlsEnabled="True"/>
+            </Grid>
+            <Button Click="CloseVideoPlayer_Click" Margin="5" Padding="5,3" Background="Black" Foreground="White">
               <FontIcon Glyph="&#xE711;" FontSize="20"/>
             </Button>
           </Canvas>

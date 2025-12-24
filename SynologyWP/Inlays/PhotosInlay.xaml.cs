@@ -94,6 +94,22 @@ namespace SynologyWP.Inlays
       _mainPage?.EndLoading();
     }
 
+    private void Image_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+      e.Handled = true;
+
+      var image = sender as Image;
+      var photo = image.DataContext as Photo;
+      if (photo.IsVideo)
+      {
+        _mainPage.VideoPlayerURL = photo.VideoURL;
+      }
+      else
+      {
+        _mainPage.ZoomedImageURL = photo.ImageURL("xl");
+      }
+    }
+
     public event PropertyChangedEventHandler PropertyChanged;
 
     /// <summary>
@@ -134,15 +150,16 @@ namespace SynologyWP.Inlays
         url = url.Replace("+", "%20"); // Synology quirk
         return url;
       }
-    }
-
-    private void Image_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
-    {
-      e.Handled = true;
-
-      var image = sender as Image;
-      var photo = image.DataContext as Photo;
-      _mainPage.ZoomedImageURL = photo.ImageURL("xl");
+      public string VideoURL
+      {
+        get
+        {
+          return _client.RequestToGETQuery(new API.Commands.SYNO.FotoTeam.Download()
+          {
+            item_id = $"[{ID}]"
+          });
+        }
+      }
     }
   }
 }
