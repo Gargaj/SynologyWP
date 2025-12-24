@@ -17,15 +17,15 @@
     
     <SemanticZoom x:Name="SemanticZoomAuthors" IsZoomOutButtonEnabled="True" ScrollViewer.ZoomMode="Enabled">
       <SemanticZoom.ZoomedOutView>
-        <GridView x:Name="ArtistsKeys" SelectionMode="None" HorizontalAlignment="Center" Padding="30">
+        <GridView x:Name="ArtistsKeys" SelectionMode="None" HorizontalAlignment="Center" Padding="0">
           <GridView.ItemTemplate>
             <DataTemplate>
-              <TextBlock Text="{Binding Group.Key}" Width="50" FontSize="46" Margin="20" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"/>
+              <TextBlock Text="{Binding Group.Key}" Width="42" FontSize="40" Margin="15" Foreground="{ThemeResource SystemControlHighlightAccentBrush}" TextAlignment="Center"/>
             </DataTemplate>
           </GridView.ItemTemplate>
           <GridView.ItemsPanel>
             <ItemsPanelTemplate>
-              <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="4"/>
+              <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="5"/>
             </ItemsPanelTemplate>
           </GridView.ItemsPanel>
         </GridView>

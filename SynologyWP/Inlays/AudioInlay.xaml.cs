@@ -41,7 +41,19 @@ namespace SynologyWP.Inlays
 
       groupedArtists.Source = result.artists
         .Select(s => new Artist(_app.Client) { Name = s.name })
-        .GroupBy(s => s.Name.Length == 0 ? '#' : (char.IsLetter(s.Name[0]) ? char.ToUpper(s.Name[0]) : '#'));
+        .GroupBy(s => {
+          var name = s.Name;
+          if (name.Length == 0)
+          {
+            return '#';
+          }
+          if (name.StartsWith("The "))
+          {
+            name = name.Substring(4);
+          }
+          return char.IsLetter(name[0]) ? char.ToUpper(name[0]) : '#';
+        })
+        .OrderBy(s=>s.Key);
       ArtistsKeys.ItemsSource = groupedArtists.View.CollectionGroups;
 
       _mainPage?.EndLoading();
