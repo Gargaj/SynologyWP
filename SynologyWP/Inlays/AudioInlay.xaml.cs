@@ -39,6 +39,11 @@ namespace SynologyWP.Inlays
       {
       });
 
+      groupedArtists.Source = result.artists
+        .Select(s => new Artist(_app.Client) { Name = s.name })
+        .GroupBy(s => s.Name.Length == 0 ? '#' : (char.IsLetter(s.Name[0]) ? char.ToUpper(s.Name[0]) : '#'));
+      ArtistsKeys.ItemsSource = groupedArtists.View.CollectionGroups;
+
       _mainPage?.EndLoading();
     }
 
@@ -51,6 +56,23 @@ namespace SynologyWP.Inlays
     protected virtual void OnPropertyChanged(string propertyName)
     {
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public class Artist
+    {
+      API.Client _client;
+
+      public Artist(API.Client client) { _client = client; }
+      public string Name { get; set; }
+      public string CoverImageURL
+      {
+        get
+        {
+          return _client.RequestToGETQuery(new API.Commands.SYNO.AudioStation.CoverGetCover() {
+            artist_name = Name,
+          });
+        }
+      }
     }
   }
 }

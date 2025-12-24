@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -14,11 +15,11 @@ namespace SynologyWP.API
     private Dictionary<string, Commands.SYNO.API.APIDescription> _endpoints = null;
 
     private Newtonsoft.Json.JsonSerializerSettings _deserializerSettings = new Newtonsoft.Json.JsonSerializerSettings()
-      {
-        MetadataPropertyHandling = Newtonsoft.Json.MetadataPropertyHandling.ReadAhead,
-        NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-        //TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Objects,
-      };
+    {
+      MetadataPropertyHandling = Newtonsoft.Json.MetadataPropertyHandling.ReadAhead,
+      NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+      //TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Objects,
+    };
 
     public Client()
     {
@@ -90,12 +91,44 @@ namespace SynologyWP.API
       return await RequestAsync<T>("POST", input);
     }
 
+    public string RequestToGETQuery(ICommand input)
+    {
+      var endpoint = (_endpoints != null && _endpoints.ContainsKey(input.APIName)) ? _endpoints[input.APIName].path : "entry.cgi";
+      var url = (_hostOverride ?? Settings.CurrentCredential.URL) + "/webapi/" + endpoint;
+
+      var queryParams = new NameValueCollection();
+      queryParams.Add("api", input.APIName);
+      queryParams.Add("version", input.APIVersion.ToString());
+      queryParams.Add("method", input.APIMethod);
+      foreach (PropertyInfo prop in input.GetType().GetProperties())
+      {
+        if (prop.GetCustomAttribute<QueryParameter>() != null)
+        {
+          var value = prop.GetValue(input);
+          if (value != null)
+          {
+            queryParams.Add(prop.Name, value.ToString());
+          }
+        }
+      }
+      if (!string.IsNullOrEmpty(Settings.CurrentCredential.SID))
+      {
+        queryParams.Add("_sid", Settings.CurrentCredential.SID);
+      }
+
+      if (queryParams != null && queryParams.AllKeys.Any())
+      {
+        url += "?" + string.Join("&", queryParams.AllKeys.Select(s => $"{s}={WebUtility.UrlEncode(queryParams.GetValues(s)[0])}"));
+        url = url.Replace("+", "%20"); // Synology quirk
+      }
+
+      return url;
+    }
+
     protected async Task<T> RequestAsync<T>(string method, ICommand input) where T : IResult
     {
       var http = new HTTP();
 
-      var endpoint = (_endpoints != null && _endpoints.ContainsKey(input.APIName)) ? _endpoints[input.APIName].path : "entry.cgi";
-      var url = (_hostOverride ?? Settings.CurrentCredential.URL) + "/webapi/" + endpoint;
       string responseJson = null;
       var headers = new NameValueCollection();
       headers.Add("Content-Type", "application/json; charset=utf-8");
@@ -103,23 +136,8 @@ namespace SynologyWP.API
       {
         case "GET":
           {
-            var queryParams = new NameValueCollection();
-            queryParams.Add("api", input.APIName);
-            queryParams.Add("version", input.APIVersion.ToString());
-            queryParams.Add("method", input.APIMethod);
-            foreach (PropertyInfo prop in input.GetType().GetProperties())
-            {
-              if (prop.GetCustomAttribute<QueryParameter>() != null)
-              {
-                queryParams.Add(prop.Name, prop.GetValue(input).ToString());
-              }
-            }
-            if (!string.IsNullOrEmpty(Settings.CurrentCredential.SID))
-            {
-              queryParams.Add("_sid", Settings.CurrentCredential.SID);
-            }
-
-            responseJson = await http.DoGETRequestAsync(url, queryParams, headers);
+            var url = RequestToGETQuery(input);
+            responseJson = await http.DoGETRequestAsync(url, null, headers);
           }
           break;
       }

@@ -11,18 +11,55 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
   <Grid>
-    <ListView ItemsSource="{Binding Entries}" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch">
-      <ListView.ItemContainerStyle>
-        <Style TargetType="ListViewItem">
-          <Setter Property="Padding" Value="4"/>
-          <Setter Property="Margin" Value="0,4,0,0"/>
-          <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-        </Style>
-      </ListView.ItemContainerStyle>
-      <ListView.ItemTemplate>
-        <DataTemplate>
-        </DataTemplate>
-      </ListView.ItemTemplate>
-    </ListView>
+    <Grid.Resources>
+      <CollectionViewSource x:Name="groupedArtists" IsSourceGrouped="True"/>
+    </Grid.Resources>
+    
+    <SemanticZoom x:Name="SemanticZoomAuthors" IsZoomOutButtonEnabled="True" ScrollViewer.ZoomMode="Enabled">
+      <SemanticZoom.ZoomedOutView>
+        <GridView x:Name="ArtistsKeys" SelectionMode="None" HorizontalAlignment="Center" Padding="30">
+          <GridView.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding Group.Key}" Width="50" FontSize="46" Margin="20" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"/>
+            </DataTemplate>
+          </GridView.ItemTemplate>
+          <GridView.ItemsPanel>
+            <ItemsPanelTemplate>
+              <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="4"/>
+            </ItemsPanelTemplate>
+          </GridView.ItemsPanel>
+        </GridView>
+      </SemanticZoom.ZoomedOutView>
+      <SemanticZoom.ZoomedInView>
+        <GridView ItemsSource="{Binding Source={StaticResource groupedArtists}}" HorizontalAlignment="Center">
+          
+          <GridView.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Vertical" Margin="5,5">
+                <Image Width="80" Height="80">
+                  <Image.Source>
+                    <BitmapImage UriSource="{Binding CoverImageURL}"/>
+                  </Image.Source>
+                </Image>
+                <TextBlock Text="{Binding Name}" TextAlignment="Center" Width="80" Height="48" FontSize="12" TextWrapping="WrapWholeWords"/>
+              </StackPanel>
+            </DataTemplate>
+          </GridView.ItemTemplate>
+
+          <GridView.GroupStyle>
+            <GroupStyle HidesIfEmpty="True">
+              <GroupStyle.HeaderTemplate>
+                <DataTemplate>
+                  <Grid Margin="0">
+                    <TextBlock Text="{Binding Key}" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"/>
+                  </Grid>
+                </DataTemplate>
+              </GroupStyle.HeaderTemplate>
+            </GroupStyle>
+          </GridView.GroupStyle>
+          
+        </GridView>
+      </SemanticZoom.ZoomedInView>
+    </SemanticZoom>
   </Grid>
 </UserControl>
