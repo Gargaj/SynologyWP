@@ -36,12 +36,12 @@
 
           <GridView.ItemTemplate>
             <DataTemplate>
-              <StackPanel Orientation="Vertical" Margin="5,5">
-                <Image Width="80" Height="80">
+              <StackPanel Orientation="Vertical" Margin="0,0">
+                <Image Width="70" Height="70" Stretch="UniformToFill">
                   <Image.Source>
                     <BitmapImage UriSource="{Binding ImageURL}"/>
                   </Image.Source>
-                </Image>
+                </Image> 
               </StackPanel>
             </DataTemplate>
           </GridView.ItemTemplate>
