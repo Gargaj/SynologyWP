@@ -37,9 +37,9 @@
           <GridView.ItemTemplate>
             <DataTemplate>
               <StackPanel Orientation="Vertical" Margin="0,0">
-                <Image Width="70" Height="70" Stretch="UniformToFill">
+                <Image Width="70" Height="70" Stretch="UniformToFill" Tapped="Image_Tapped">
                   <Image.Source>
-                    <BitmapImage UriSource="{Binding ImageURL}"/>
+                    <BitmapImage UriSource="{Binding ImageURLThumb}"/>
                   </Image.Source>
                 </Image> 
               </StackPanel>

@@ -8,6 +8,7 @@ namespace SynologyWP.Pages
   {
     private App _app;
     private uint _isLoading = 0;
+    private string _zoomedImageURL;
 
     public MainPage()
     {
@@ -29,6 +30,23 @@ namespace SynologyWP.Pages
         AudioPivot.Visibility = _app.Client.HasEndpoint("SYNO.AudioStation.Artist") ? Visibility.Visible : Visibility.Collapsed;
         PhotosPivot.Visibility = _app.Client.HasEndpoint("SYNO.FotoTeam.Browse.Timeline") ? Visibility.Visible : Visibility.Collapsed;
       }
+    }
+
+    public string ZoomedImageURL
+    {
+      get => _zoomedImageURL;
+      set
+      {
+        _zoomedImageURL = value;
+        OnPropertyChanged(nameof(ZoomedImageURL));
+        OnPropertyChanged(nameof(IsZoomedImageValid));
+      }
+    }
+    public bool IsZoomedImageValid => !string.IsNullOrEmpty(ZoomedImageURL);
+
+    private void CloseZoomedImage_Click(object sender, RoutedEventArgs e)
+    {
+      ZoomedImageURL = null;
     }
 
     private async void Main_PivotItemLoading(Pivot sender, PivotItemEventArgs args)

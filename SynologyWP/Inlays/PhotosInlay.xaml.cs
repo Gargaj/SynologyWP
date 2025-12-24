@@ -112,25 +112,32 @@ namespace SynologyWP.Inlays
       public string Name { get; set; }
       public string Month { get; set; }
       public string CacheKey { get; set; }
-      public string ImageURL
+      public string ImageURLThumb => ImageURL("sm");
+      public string ImageURL(string size)
       {
-        get
-        {
-          var url = _client.Settings.CurrentCredential.URL;
-          url += "/synofoto/api/v2/t/Thumbnail/get";
+        var url = _client.Settings.CurrentCredential.URL;
+        url += "/synofoto/api/v2/t/Thumbnail/get";
 
-          var queryParams = new System.Collections.Specialized.NameValueCollection();
-          queryParams.Add("type", "unit");
-          queryParams.Add("size", "sm");
-          queryParams.Add("id", ID.ToString());
-          queryParams.Add("cache_key", CacheKey);
-          queryParams.Add("_sid", _client.Settings.CurrentCredential.SID);
+        var queryParams = new System.Collections.Specialized.NameValueCollection();
+        queryParams.Add("type", "unit");
+        queryParams.Add("size", size);
+        queryParams.Add("id", ID.ToString());
+        queryParams.Add("cache_key", CacheKey);
+        queryParams.Add("_sid", _client.Settings.CurrentCredential.SID);
 
-          url += "?" + string.Join("&", queryParams.AllKeys.Select(s => $"{s}={WebUtility.UrlEncode(queryParams.GetValues(s)[0])}"));
-          url = url.Replace("+", "%20"); // Synology quirk
-          return url;
-        }
+        url += "?" + string.Join("&", queryParams.AllKeys.Select(s => $"{s}={WebUtility.UrlEncode(queryParams.GetValues(s)[0])}"));
+        url = url.Replace("+", "%20"); // Synology quirk
+        return url;
       }
+    }
+
+    private void Image_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+      e.Handled = true;
+
+      var image = sender as Image;
+      var photo = image.DataContext as Photo;
+      _mainPage.ZoomedImageURL = photo.ImageURL("xl");
     }
   }
 }
