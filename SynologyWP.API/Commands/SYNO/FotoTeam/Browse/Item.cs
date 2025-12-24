@@ -26,6 +26,25 @@ namespace SynologyWP.API.Commands.SYNO.FotoTeam.Browse
     public int height;
   }
 
+  public class VideoMeta
+  {
+    public int duration;
+    public int orientation;
+    public int frame_bitrate;
+    public int video_bitrate;
+    public int audio_bitrate;
+    public float framerate;
+    public int resolution_x;
+    public int resolution_y;
+    public string video_codec;
+    public string audio_codec;
+    public string container_type;
+    public int video_profile;
+    public int video_level;
+    public int audio_frequency;
+    public int audio_chan;
+  }
+
   public class Thumbnail
   {
     public string sm;
@@ -36,14 +55,14 @@ namespace SynologyWP.API.Commands.SYNO.FotoTeam.Browse
     public string unit_id;
   }
 
-  public class Addditional
+  public class Additional
   {
     public Resolution resolution;
     public int orientation;
     public int orientation_original;
     public Thumbnail thumbnail;
     public object address;
-    public object video_meta;
+    public VideoMeta video_meta;
     public object video_convert;
     public object video_convert_status;
   };
@@ -58,7 +77,7 @@ namespace SynologyWP.API.Commands.SYNO.FotoTeam.Browse
     public int owner_user_id;
     public int folder_id;
     public string type;
-    public Addditional additional;
+    public Additional additional;
   };
 
   public class ItemListResult : IResult

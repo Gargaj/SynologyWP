@@ -72,16 +72,18 @@ namespace SynologyWP.Inlays
         limit = sectionItem.item_count,
         start_time = time.start_time,
         end_time = time.end_time,
-        additional = "[\"thumbnail\"]",
+        additional = "[\"thumbnail\",\"video_meta\"]",
       });
 
-      _entryList.AddRange(items.list);
+      _entryList.AddRange(items.list.Where(s=>!_entryList.Any(t=>t.id==s.id)));
 
       groupedPhotosByMonth.Source = _entryList
         .Select(s => new Photo(_app.Client)
         {
           ID = s.id,
           Name = s.filename,
+          IsVideo = s.type == "video",
+          VideoLengthMS = s.additional?.video_meta?.duration ?? 0,
           Month = API.Helpers.UnixTimeStampToDateTime(s.time).ToLocalTime().ToString("yyyy-MM"),
           CacheKey = s.additional.thumbnail.cache_key,
         })
@@ -112,6 +114,9 @@ namespace SynologyWP.Inlays
       public string Name { get; set; }
       public string Month { get; set; }
       public string CacheKey { get; set; }
+      public bool IsVideo { get; set; }
+      public string VideoLengthString => $"{VideoLengthMS/60000}:{VideoLengthMS/1000,2}";
+      public int VideoLengthMS { get; set; }
       public string ImageURLThumb => ImageURL("sm");
       public string ImageURL(string size)
       {

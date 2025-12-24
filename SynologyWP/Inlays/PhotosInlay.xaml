@@ -36,13 +36,25 @@
 
           <GridView.ItemTemplate>
             <DataTemplate>
-              <StackPanel Orientation="Vertical" Margin="0,0">
-                <Image Width="70" Height="70" Stretch="UniformToFill" Tapped="Image_Tapped">
+              <Canvas Width="70" Height="70">
+                <Image Canvas.Top="0" Canvas.Left="0" Width="70" Height="70" Stretch="UniformToFill" Tapped="Image_Tapped">
                   <Image.Source>
                     <BitmapImage UriSource="{Binding ImageURLThumb}"/>
                   </Image.Source>
-                </Image> 
-              </StackPanel>
+                </Image>
+                <Canvas Canvas.Top="0" Canvas.Left="0" Width="70" Height="70">
+                  <i:Interaction.Behaviors>
+                    <c:DataTriggerBehavior Binding="{Binding IsVideo}" Value="True">
+                      <c:ChangePropertyAction PropertyName="Visibility" Value="Visible" />
+                    </c:DataTriggerBehavior>
+                    <c:DataTriggerBehavior Binding="{Binding IsVideo}" Value="False">
+                      <c:ChangePropertyAction PropertyName="Visibility" Value="Collapsed" />
+                    </c:DataTriggerBehavior>
+                  </i:Interaction.Behaviors>
+                  <FontIcon Canvas.Top="0" Canvas.Left="0" Width="70" Height="70" FontSize="32" Glyph="&#xE768;" Foreground="White"/>
+                  <TextBlock Text="{Binding VideoLengthString}" TextAlignment="Right" VerticalAlignment="Bottom" FontSize="10" Canvas.Left="45" Canvas.Top="55" Foreground="White"/>
+                </Canvas>
+              </Canvas>
             </DataTemplate>
           </GridView.ItemTemplate>
 
