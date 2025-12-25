@@ -13,26 +13,139 @@
   <Grid>
     <Grid.Resources>
       <CollectionViewSource x:Name="groupedArtists" IsSourceGrouped="True"/>
+      <CollectionViewSource x:Name="groupedAlbums" IsSourceGrouped="True"/>
     </Grid.Resources>
-    
-    <SemanticZoom IsZoomOutButtonEnabled="True" ScrollViewer.ZoomMode="Enabled">
-      <SemanticZoom.ZoomedOutView>
-        <GridView x:Name="ArtistsKeys" SelectionMode="None" HorizontalAlignment="Center" Padding="0">
-          <GridView.ItemTemplate>
-            <DataTemplate>
-              <TextBlock Text="{Binding Group.Key}" Width="42" FontSize="40" Margin="15" Foreground="{ThemeResource SystemControlHighlightAccentBrush}" TextAlignment="Center"/>
-            </DataTemplate>
-          </GridView.ItemTemplate>
-          <GridView.ItemsPanel>
-            <ItemsPanelTemplate>
-              <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="5"/>
-            </ItemsPanelTemplate>
-          </GridView.ItemsPanel>
-        </GridView>
-      </SemanticZoom.ZoomedOutView>
-      <SemanticZoom.ZoomedInView>
-        <GridView ItemsSource="{Binding Source={StaticResource groupedArtists}}" HorizontalAlignment="Center">
-          
+
+    <Pivot PivotItemLoading="Pivot_PivotItemLoading">
+      <Pivot.Resources>
+        <Style TargetType="PivotItem">
+          <Setter Property="Margin" Value="0"/>
+        </Style>
+        <Style TargetType="PivotHeaderItem">
+          <Setter Property="Margin" Value="0"/>
+          <Setter Property="Padding" Value="0,0,12,0"/>
+          <Setter Property="FontSize" Value="16"/>
+        </Style>
+      </Pivot.Resources>
+      
+      <!-- Artists -->
+      <PivotItem x:Name="Artists">
+        <PivotItem.Header>
+          <TextBlock Text="Artists"/>
+        </PivotItem.Header>
+
+        <SemanticZoom IsZoomOutButtonEnabled="True" ScrollViewer.ZoomMode="Enabled">
+          <SemanticZoom.ZoomedOutView>
+            <GridView x:Name="ArtistsKeys" SelectionMode="None" HorizontalAlignment="Center" Padding="0">
+              <GridView.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Group.Key}" Width="42" FontSize="40" Margin="15" Foreground="{ThemeResource SystemControlHighlightAccentBrush}" TextAlignment="Center"/>
+                </DataTemplate>
+              </GridView.ItemTemplate>
+              <GridView.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="5"/>
+                </ItemsPanelTemplate>
+              </GridView.ItemsPanel>
+            </GridView>
+          </SemanticZoom.ZoomedOutView>
+          <SemanticZoom.ZoomedInView>
+            <GridView ItemsSource="{Binding Source={StaticResource groupedArtists}}" HorizontalAlignment="Center">
+
+              <GridView.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Vertical" Margin="5,5">
+                    <Image Width="80" Height="80" Stretch="UniformToFill">
+                      <Image.Source>
+                        <BitmapImage UriSource="{Binding CoverImageURL}"/>
+                      </Image.Source>
+                    </Image>
+                    <TextBlock Text="{Binding Name}" TextAlignment="Center" Width="80" Height="48" FontSize="12" TextWrapping="WrapWholeWords"/>
+                  </StackPanel>
+                </DataTemplate>
+              </GridView.ItemTemplate>
+
+              <GridView.GroupStyle>
+                <GroupStyle HidesIfEmpty="True">
+                  <GroupStyle.HeaderTemplate>
+                    <DataTemplate>
+                      <Grid Margin="0">
+                        <TextBlock Text="{Binding Key}" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"/>
+                      </Grid>
+                    </DataTemplate>
+                  </GroupStyle.HeaderTemplate>
+                </GroupStyle>
+              </GridView.GroupStyle>
+
+            </GridView>
+          </SemanticZoom.ZoomedInView>
+        </SemanticZoom>
+
+      </PivotItem>
+
+      <!-- Albums -->
+      <PivotItem x:Name="Albums">
+        <PivotItem.Header>
+          <TextBlock Text="Albums"/>
+        </PivotItem.Header>
+
+        <SemanticZoom IsZoomOutButtonEnabled="True" ScrollViewer.ZoomMode="Enabled">
+          <SemanticZoom.ZoomedOutView>
+            <GridView x:Name="AlbumKeys" SelectionMode="None" HorizontalAlignment="Center" Padding="0">
+              <GridView.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Group.Key}" Width="42" FontSize="40" Margin="15" Foreground="{ThemeResource SystemControlHighlightAccentBrush}" TextAlignment="Center"/>
+                </DataTemplate>
+              </GridView.ItemTemplate>
+              <GridView.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="5"/>
+                </ItemsPanelTemplate>
+              </GridView.ItemsPanel>
+            </GridView>
+          </SemanticZoom.ZoomedOutView>
+          <SemanticZoom.ZoomedInView>
+            <GridView ItemsSource="{Binding Source={StaticResource groupedAlbums}}" HorizontalAlignment="Center">
+
+              <GridView.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Vertical" Margin="5,5">
+                    <Image Width="80" Height="80" Stretch="UniformToFill">
+                      <Image.Source>
+                        <BitmapImage UriSource="{Binding CoverImageURL}"/>
+                      </Image.Source>
+                    </Image>
+                    <TextBlock Text="{Binding Name}" TextAlignment="Center" Width="80" Height="48" FontSize="12" TextWrapping="WrapWholeWords"/>
+                  </StackPanel>
+                </DataTemplate>
+              </GridView.ItemTemplate>
+
+              <GridView.GroupStyle>
+                <GroupStyle HidesIfEmpty="True">
+                  <GroupStyle.HeaderTemplate>
+                    <DataTemplate>
+                      <Grid Margin="0">
+                        <TextBlock Text="{Binding Key}" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"/>
+                      </Grid>
+                    </DataTemplate>
+                  </GroupStyle.HeaderTemplate>
+                </GroupStyle>
+              </GridView.GroupStyle>
+
+            </GridView>
+          </SemanticZoom.ZoomedInView>
+        </SemanticZoom>
+
+      </PivotItem>
+
+      <!-- Recently Added -->
+      <PivotItem x:Name="Recent">
+        <PivotItem.Header>
+          <TextBlock Text="Recently Added"/>
+        </PivotItem.Header>
+
+        <GridView ItemsSource="{Binding RecentlyAdded}" HorizontalAlignment="Center">
+
           <GridView.ItemTemplate>
             <DataTemplate>
               <StackPanel Orientation="Vertical" Margin="5,5">
@@ -46,21 +159,16 @@
             </DataTemplate>
           </GridView.ItemTemplate>
 
-          <GridView.GroupStyle>
-            <GroupStyle HidesIfEmpty="True">
-              <GroupStyle.HeaderTemplate>
-                <DataTemplate>
-                  <Grid Margin="0">
-                    <TextBlock Text="{Binding Key}" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"/>
-                  </Grid>
-                </DataTemplate>
-              </GroupStyle.HeaderTemplate>
-            </GroupStyle>
-          </GridView.GroupStyle>
+          <GridView.ItemsPanel>
+            <ItemsPanelTemplate>
+              <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="5"/>
+            </ItemsPanelTemplate>
+          </GridView.ItemsPanel>
           
         </GridView>
-      </SemanticZoom.ZoomedInView>
-    </SemanticZoom>
 
+      </PivotItem>
+
+    </Pivot>
   </Grid>
 </UserControl>
