@@ -9,6 +9,8 @@ namespace SynologyWP.API.Commands.SYNO.AudioStation
     public string APIMethod => "list";
 
     [QueryParameter]
+    public string artist { get; set; }
+    [QueryParameter]
     public string sort_by { get; set; }
     [QueryParameter]
     public string sort_direction { get; set; }

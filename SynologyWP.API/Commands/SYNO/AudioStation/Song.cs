@@ -4,7 +4,7 @@ namespace SynologyWP.API.Commands.SYNO.AudioStation
 {
   public class SongList : ICommand
   {
-    public string APIName => "SYNO.AudioStation.Album";
+    public string APIName => "SYNO.AudioStation.Song";
     public int APIVersion => 3;
     public string APIMethod => "list";
 

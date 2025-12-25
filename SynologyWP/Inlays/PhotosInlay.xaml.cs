@@ -131,7 +131,7 @@ namespace SynologyWP.Inlays
       public string Month { get; set; }
       public string CacheKey { get; set; }
       public bool IsVideo { get; set; }
-      public string VideoLengthString => $"{VideoLengthMS/60000}:{VideoLengthMS/1000,2}";
+      public string VideoLengthString => $"{VideoLengthMS/60000}:{VideoLengthMS/1000:D2}";
       public int VideoLengthMS { get; set; }
       public string ImageURLThumb => ImageURL("sm");
       public string ImageURL(string size)
