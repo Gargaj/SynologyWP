@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,6 +35,24 @@ namespace SynologyWP.Inlays
     public List<Song> SelectedAlbumSongs { get; set; }
     public Artist SelectedArtist { get; set; }
     public Album SelectedAlbum { get; set; }
+    public Song CurrentSong
+    {
+      get
+      {
+        if (audioPlayer.MediaPlayer.PlaybackSession.PlaybackState == Windows.Media.Playback.MediaPlaybackState.None)
+        {
+          return null;
+        }
+        var playlist = audioPlayer.MediaPlayer.Source as Windows.Media.Playback.MediaPlaybackList;
+        var index = (int)playlist.CurrentItemIndex;
+        if (index < 0)
+        {
+          return null;
+        }
+        return SelectedAlbumSongs[index];
+      }
+    }
+    public string CurrentSongID => CurrentSong?.ID;
 
     private async void Pivot_PivotItemLoading(Pivot sender, PivotItemEventArgs args)
     {
@@ -153,7 +172,7 @@ namespace SynologyWP.Inlays
         sort_direction = "asc",
         additional = "song_tag,song_audio",
       });
-      SelectedAlbumSongs = result.songs.Select(s => new Song(_app.Client) {
+      SelectedAlbumSongs = result.songs.Select(s => new Song(_app.Client, this) {
         ID = s.id,
         Title = s.title,
         Artist = s.additional.song_tag.artist,
@@ -212,7 +231,21 @@ namespace SynologyWP.Inlays
 
       var playlist = (audioPlayer.Source as Windows.Media.Playback.MediaPlaybackList);
       playlist.MoveTo((uint)SelectedAlbumSongs.IndexOf(song));
+      playlist.CurrentItemChanged += Playlist_CurrentItemChanged;
       audioPlayer.MediaPlayer.Play();
+      OnPropertyChanged(nameof(CurrentSongID));
+    }
+
+    private async void Playlist_CurrentItemChanged(Windows.Media.Playback.MediaPlaybackList sender, Windows.Media.Playback.CurrentMediaPlaybackItemChangedEventArgs args)
+    {
+      await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
+      {
+        OnPropertyChanged(nameof(CurrentSongID));
+        foreach(var song in SelectedAlbumSongs)
+        {
+          song?.OnPropertyChanged("IsPlaying");
+        }
+      });
     }
 
     private void AudioPlayer_Loaded(object sender, RoutedEventArgs e)
@@ -258,12 +291,14 @@ namespace SynologyWP.Inlays
       }
     }
 
-    public class Song
+    public class Song : INotifyPropertyChanged
     {
       API.Client _client;
+      AudioInlay _inlay;
 
-      public Song(API.Client client) { _client = client; }
+      public Song(API.Client client, AudioInlay inlay) { _client = client; _inlay = inlay; }
       public string ID { get; set; }
+      public bool IsPlaying => _inlay.CurrentSongID == ID;
       public int TrackNumber { get; set; }
       public string Artist { get; set; }
       public string Title { get; set; }
@@ -279,6 +314,17 @@ namespace SynologyWP.Inlays
             id = ID
           });
         }
+      }
+
+      public event PropertyChangedEventHandler PropertyChanged;
+
+      /// <summary>
+      /// Raises this object's PropertyChanged event.
+      /// </summary>
+      /// <param name="propertyName">The property that has a new value.</param>
+      public virtual void OnPropertyChanged(string propertyName)
+      {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
       }
     }
 

@@ -253,7 +253,26 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="48"/>
                   </Grid.ColumnDefinitions>
-                  <TextBlock Grid.Column="0" Margin="0,0,20,0" Text="{Binding TrackNumber}" FontSize="24" TextAlignment="Right" />
+                  <TextBlock Grid.Column="0" Margin="0,0,20,0" Text="{Binding TrackNumber}" FontSize="24" TextAlignment="Right">
+                    <i:Interaction.Behaviors>
+                      <c:DataTriggerBehavior Binding="{Binding IsPlaying}" Value="True">
+                        <c:ChangePropertyAction PropertyName="Visibility" Value="Collapsed" />
+                      </c:DataTriggerBehavior>
+                      <c:DataTriggerBehavior Binding="{Binding IsPlaying}" Value="False">
+                        <c:ChangePropertyAction PropertyName="Visibility" Value="Visible" />
+                      </c:DataTriggerBehavior>
+                    </i:Interaction.Behaviors>
+                  </TextBlock>
+                  <FontIcon Grid.Column="0" Margin="0,0,20,0" Glyph="&#xE768;" FontSize="24">
+                    <i:Interaction.Behaviors>
+                      <c:DataTriggerBehavior Binding="{Binding IsPlaying}" Value="True">
+                        <c:ChangePropertyAction PropertyName="Visibility" Value="Visible" />
+                      </c:DataTriggerBehavior>
+                      <c:DataTriggerBehavior Binding="{Binding IsPlaying}" Value="False">
+                        <c:ChangePropertyAction PropertyName="Visibility" Value="Collapsed" />
+                      </c:DataTriggerBehavior>
+                    </i:Interaction.Behaviors>
+                  </FontIcon>
                   <StackPanel Grid.Column="1" Orientation="Vertical">
                     <TextBlock Text="{Binding Title}" FontSize="18"/>
                     <TextBlock Text="{Binding Artist}" FontSize="12" Foreground="{ThemeResource SystemColorGrayTextBrush}"/>
