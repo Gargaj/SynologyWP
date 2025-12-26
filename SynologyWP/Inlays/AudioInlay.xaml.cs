@@ -182,6 +182,7 @@ namespace SynologyWP.Inlays
       OnPropertyChanged(nameof(SelectedAlbumSongs));
 
       var playlist = new Windows.Media.Playback.MediaPlaybackList();
+      playlist.CurrentItemChanged += Playlist_CurrentItemChanged;
       foreach (var song in SelectedAlbumSongs)
       {
         var url = Windows.Media.Core.MediaSource.CreateFromUri(new System.Uri(song.URL));
@@ -231,7 +232,6 @@ namespace SynologyWP.Inlays
 
       var playlist = (audioPlayer.Source as Windows.Media.Playback.MediaPlaybackList);
       playlist.MoveTo((uint)SelectedAlbumSongs.IndexOf(song));
-      playlist.CurrentItemChanged += Playlist_CurrentItemChanged;
       audioPlayer.MediaPlayer.Play();
       OnPropertyChanged(nameof(CurrentSongID));
     }
