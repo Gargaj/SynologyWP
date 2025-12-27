@@ -20,10 +20,11 @@ namespace SynologyWP.API
       return dateTime;
     }
 
-    public static string HumanReadableSize(ulong len)
+    public static string HumanReadableSize(ulong size)
     {
       string[] sizes = { "B", "KB", "MB", "GB", "TB" };
       int order = 0;
+      double len = size;
       while (len >= 1024 && order < sizes.Length - 1)
       {
         order++;

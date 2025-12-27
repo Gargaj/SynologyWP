@@ -16,6 +16,14 @@
 
     <Pivot x:Name="Inlays" PivotItemLoading="Main_PivotItemLoading" PivotItemUnloaded="Main_PivotItemUnloading">
 
+      <!-- Status -->
+      <PivotItem>
+        <PivotItem.Header>
+          <TextBlock Text="Status"/>
+        </PivotItem.Header>
+        <inlays:StatusInlay x:Name="StatusInlay"/>
+      </PivotItem>
+
       <!-- Files -->
       <PivotItem>
         <PivotItem.Header>
