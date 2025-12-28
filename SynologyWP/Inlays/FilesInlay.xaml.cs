@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.Storage.Streams;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -25,6 +27,7 @@ namespace SynologyWP.Inlays
 
     public List<Entry> Entries { get; set; }
     public string CurrentPath { get; set; }
+    public bool UploadAllowed => CurrentPath != "/";
 
     private void NotificationsInlay_Loaded(object sender, RoutedEventArgs e)
     {
@@ -47,6 +50,7 @@ namespace SynologyWP.Inlays
 
       CurrentPath = directory;
       OnPropertyChanged(nameof(CurrentPath));
+      OnPropertyChanged(nameof(UploadAllowed));
 
       if (directory == string.Empty || directory == "/")
       {
@@ -178,6 +182,90 @@ namespace SynologyWP.Inlays
       if (element != null)
       {
         FlyoutBase.ShowAttachedFlyout(element);
+      }
+    }
+
+    private async void Upload_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+      var picker = new Windows.Storage.Pickers.FileOpenPicker
+      {
+        SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary
+      };
+
+      picker.FileTypeFilter.Add("*");
+
+      var files = await picker.PickMultipleFilesAsync();
+      var failed = new List<string>();
+      _mainPage?.StartLoading();
+      foreach(var file in files)
+      {
+        using (var fileStream = await file.OpenAsync(FileAccessMode.Read))
+        {
+          var buffer = await FileIO.ReadBufferAsync(file);
+          byte[] byteData = new byte[buffer.Length];
+          using (var dataReader = DataReader.FromBuffer(buffer))
+          {
+            dataReader.ReadBytes(byteData);
+          }
+
+          var form = new System.Net.Http.MultipartFormDataContent();
+          form.Add(new System.Net.Http.StringContent("true"), "overwrite");
+          form.Add(new System.Net.Http.StringContent(CurrentPath), "path");
+          form.Add(new System.Net.Http.StringContent(byteData.Length.ToString()), "size");
+          
+          var fileContent = new System.Net.Http.ByteArrayContent(byteData);
+          form.Add(fileContent, "file", file.Name);
+
+          // Workarounds for server software being picky about the headers
+          // 1. Remove quotes around multipart boundary
+          var sh = form.Headers.ContentType.Parameters.First(s => s.Name == "boundary");
+          sh.Value = sh.Value.Replace("\"", "");
+
+          // 2. Add quotes around multipart field names
+          foreach (var i in form)
+          {
+            i.Headers.ContentType = null;
+            foreach (var h in i.Headers.ContentDisposition.Parameters)
+            {
+              h.Value = $"\"{h.Value}\"";
+            }
+          }
+
+          var httpClient = new System.Net.Http.HttpClient(new System.Net.Http.HttpClientHandler
+          {
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+          });
+
+          var url = _app.Client.RequestToGETQuery(new API.Commands.SYNO.FileStation.Upload());
+          var result = await httpClient.PostAsync(url, form);
+          var responseBytes = await result.Content.ReadAsByteArrayAsync();
+          var responseString = System.Text.Encoding.UTF8.GetString(responseBytes);
+          var response = Newtonsoft.Json.JsonConvert.DeserializeObject<API.CommandResult<API.Commands.SYNO.FileStation.UploadResult>>(responseString, new Newtonsoft.Json.JsonSerializerSettings()
+          {
+            MetadataPropertyHandling = Newtonsoft.Json.MetadataPropertyHandling.ReadAhead,
+            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+          });
+          if (!response.success)
+          {
+            failed.Add(file.Name);
+          }
+        }
+      }
+      _mainPage?.EndLoading();
+      if (failed.Any())
+      {
+        var dialog = new ContentDialog
+        {
+          Content = new TextBlock { Text = $"Upload failed for the following:\n{string.Join("\n", failed)}", TextWrapping = TextWrapping.WrapWholeWords },
+          Title = $"Uploads failed :(",
+          PrimaryButtonText = "OK :("
+        };
+
+        await dialog.ShowAsync();
+      }
+      else
+      {
+        await ListDirectory(CurrentPath);
       }
     }
 

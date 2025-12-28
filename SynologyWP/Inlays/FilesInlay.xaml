@@ -16,7 +16,24 @@
       <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
     <Border Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource SystemColorActiveCaptionBrush}">
-      <TextBlock Text="{Binding CurrentPath}" FontSize="20" Margin="0,6,0,0"/>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Text="{Binding CurrentPath}" FontSize="20" Margin="0,6,0,0"/>
+        <Button Grid.Column="1" HorizontalAlignment="Right" Tapped="Upload_Tapped">
+          <i:Interaction.Behaviors>
+            <c:DataTriggerBehavior Binding="{Binding UploadAllowed}" Value="True">
+              <c:ChangePropertyAction PropertyName="Visibility" Value="Visible" />
+            </c:DataTriggerBehavior>
+            <c:DataTriggerBehavior Binding="{Binding UploadAllowed}" Value="False">
+              <c:ChangePropertyAction PropertyName="Visibility" Value="Collapsed" />
+            </c:DataTriggerBehavior>
+          </i:Interaction.Behaviors>
+          <FontIcon Glyph="&#xE898;"/>
+        </Button>
+      </Grid>
     </Border>
     <ListView Grid.Row="1" ItemsSource="{Binding Entries}" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch">
       <ListView.ItemContainerStyle>

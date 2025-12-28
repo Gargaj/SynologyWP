@@ -132,6 +132,7 @@
     <Compile Include="Commands\SYNO\Core\System.cs" />
     <Compile Include="Commands\SYNO\Core\System\Health.cs" />
     <Compile Include="Commands\SYNO\Entry\Request.cs" />
+    <Compile Include="Commands\SYNO\FileStation\Upload.cs" />
     <Compile Include="Commands\SYNO\FileStation\Download.cs" />
     <Compile Include="Commands\SYNO\FileStation\BackgroundTask.cs" />
     <Compile Include="Commands\SYNO\FileStation\List.cs" />
