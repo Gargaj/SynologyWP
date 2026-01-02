@@ -87,23 +87,27 @@ namespace SynologyWP.Inlays
     {
       _mainPage?.StartLoading();
 
-      var result = await _app.Client.GetAsync<API.Commands.SYNO.AudioStation.ArtistListResult>(new API.Commands.SYNO.AudioStation.ArtistList());
-      groupedArtists.Source = result.artists
-        .Select(s => new Artist(_app.Client) { Name = s.name })
-        .GroupBy(s => {
-          var name = s.Name;
-          if (name.Length == 0)
+      if (groupedArtists.Source == null)
+      {
+        var result = await _app.Client.GetAsync<API.Commands.SYNO.AudioStation.ArtistListResult>(new API.Commands.SYNO.AudioStation.ArtistList());
+        groupedArtists.Source = result.artists
+          .Select(s => new Artist(_app.Client) { Name = s.name })
+          .GroupBy(s =>
           {
-            return '#';
-          }
-          if (name.StartsWith("The "))
-          {
-            name = name.Substring(4);
-          }
-          return char.IsLetter(name[0]) ? char.ToUpper(name[0]) : '#';
-        })
-        .OrderBy(s=>s.Key);
-      ArtistsKeys.ItemsSource = groupedArtists.View.CollectionGroups;
+            var name = s.Name;
+            if (name.Length == 0)
+            {
+              return '#';
+            }
+            if (name.StartsWith("The "))
+            {
+              name = name.Substring(4);
+            }
+            return char.IsLetter(name[0]) ? char.ToUpper(name[0]) : '#';
+          })
+          .OrderBy(s => s.Key);
+        ArtistsKeys.ItemsSource = groupedArtists.View.CollectionGroups;
+      }
 
       _mainPage?.EndLoading();
     }
@@ -112,20 +116,23 @@ namespace SynologyWP.Inlays
     {
       _mainPage?.StartLoading();
 
-      var result = await _app.Client.GetAsync<API.Commands.SYNO.AudioStation.AlbumListResult>(new API.Commands.SYNO.AudioStation.AlbumList());
-      groupedAlbums.Source = result.albums
-        .Select(s => new Album(_app.Client) { ArtistName = s.album_artist, Name = s.name, Year = s.year })
-        .GroupBy(s =>
-        {
-          var name = s.Name;
-          if (name.Length == 0)
+      if (groupedAlbums.Source == null)
+      {
+        var result = await _app.Client.GetAsync<API.Commands.SYNO.AudioStation.AlbumListResult>(new API.Commands.SYNO.AudioStation.AlbumList());
+        groupedAlbums.Source = result.albums
+          .Select(s => new Album(_app.Client) { ArtistName = s.album_artist, Name = s.name, Year = s.year })
+          .GroupBy(s =>
           {
-            return '#';
-          }
-          return char.IsLetter(name[0]) ? char.ToUpper(name[0]) : '#';
-        })
-        .OrderBy(s => s.Key);
-      AlbumKeys.ItemsSource = groupedAlbums.View.CollectionGroups;
+            var name = s.Name;
+            if (name.Length == 0)
+            {
+              return '#';
+            }
+            return char.IsLetter(name[0]) ? char.ToUpper(name[0]) : '#';
+          })
+          .OrderBy(s => s.Key);
+        AlbumKeys.ItemsSource = groupedAlbums.View.CollectionGroups;
+      }
 
       _mainPage?.EndLoading();
     }
@@ -134,14 +141,17 @@ namespace SynologyWP.Inlays
     {
       _mainPage?.StartLoading();
 
-      var result = await _app.Client.GetAsync<API.Commands.SYNO.AudioStation.AlbumListResult>(new API.Commands.SYNO.AudioStation.AlbumList()
+      if (!RecentlyAdded.Any())
       {
-        sort_by = "time",
-        sort_direction = "desc",
-        limit = 50,
-      });
-      RecentlyAdded = result.albums.Select(s => new Album(_app.Client) { ArtistName = s.album_artist, Name = s.name, Year = s.year });
-      OnPropertyChanged(nameof(RecentlyAdded));
+        var result = await _app.Client.GetAsync<API.Commands.SYNO.AudioStation.AlbumListResult>(new API.Commands.SYNO.AudioStation.AlbumList()
+        {
+          sort_by = "time",
+          sort_direction = "desc",
+          limit = 50,
+        });
+        RecentlyAdded = result.albums.Select(s => new Album(_app.Client) { ArtistName = s.album_artist, Name = s.name, Year = s.year });
+        OnPropertyChanged(nameof(RecentlyAdded));
+      }
 
       _mainPage?.EndLoading();
     }
