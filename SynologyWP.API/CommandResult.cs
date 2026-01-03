@@ -10,7 +10,7 @@ namespace SynologyWP.API
   public class CommandResultError
   {
     public int code;
-    public List<object> errors;
+    //public List<object> errors;
   };
 
   public class CommandResult<T> where T : IResult

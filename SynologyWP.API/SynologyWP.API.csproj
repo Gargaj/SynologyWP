@@ -129,6 +129,8 @@
     <Compile Include="Commands\SYNO\AudioStation\Cover.cs" />
     <Compile Include="Commands\SYNO\AudioStation\Artist.cs" />
     <Compile Include="Commands\SYNO\AudioStation\Album.cs" />
+    <Compile Include="Commands\SYNO\Core\DSMNotify\Notify.cs" />
+    <Compile Include="Commands\SYNO\Core\DSMNotify\Strings.cs" />
     <Compile Include="Commands\SYNO\Core\System.cs" />
     <Compile Include="Commands\SYNO\Core\System\Health.cs" />
     <Compile Include="Commands\SYNO\Entry\Request.cs" />
