@@ -17,7 +17,7 @@
       <Run Text="{Binding Uptime}"/>
     </TextBlock>
 
-    <TextBlock Text="Volumes" FontSize="24"/>
+    <TextBlock Text="Volumes" FontSize="24" Margin="0,20,0,0"/>
     <ListView ItemsSource="{Binding Volumes}">
       <ListView.Resources>
         <Style TargetType="ListViewItem">
@@ -40,7 +40,7 @@
       </ListView.ItemTemplate>
     </ListView>
 
-    <TextBlock Text="Notifications" FontSize="24"/>
+    <TextBlock Text="Notifications" FontSize="24" Margin="0,20,0,0"/>
     <ListView ItemsSource="{Binding Notifications}">
       <ListView.Resources>
         <Style TargetType="ListViewItem">
