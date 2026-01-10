@@ -20,6 +20,11 @@ namespace SynologyWP.API
       return dateTime;
     }
 
+    public static ulong DateTimeToUnixTimeStamp(DateTime date)
+    {
+      return (ulong)((DateTimeOffset)date).ToUnixTimeSeconds();
+    }
+
     public static string HumanReadableSize(ulong size)
     {
       string[] sizes = { "B", "KB", "MB", "GB", "TB" };

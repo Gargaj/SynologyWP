@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net;
@@ -14,13 +15,19 @@ namespace SynologyWP.Inlays
     private Pages.MainPage _mainPage;
     private API.Commands.SYNO.FotoTeam.Browse.TimelineGetResult _timeline;
     private API.Commands.SYNO.FotoTeam.Search.FilterListResult _filter;
-    private List<API.Commands.SYNO.FotoTeam.Browse.Entry> _entryList;
+    private List<IGrouping<string, Photo>> _groupedItems;
+    private List<API.Commands.SYNO.FotoTeam.Browse.Item> _loadedSections = new List<API.Commands.SYNO.FotoTeam.Browse.Item>();
+    private List<API.Commands.SYNO.FotoTeam.Browse.Item> _enqueuedSections = new List<API.Commands.SYNO.FotoTeam.Browse.Item>();
+    private DispatcherTimer _periodicUpdateTimer = new DispatcherTimer();
+    private Task _task = null;
 
     public PhotosInlay()
     {
       InitializeComponent();
       _app = (App)Application.Current;
       Loaded += NotificationsInlay_Loaded;
+      _periodicUpdateTimer.Interval = TimeSpan.FromSeconds(1.0f);
+      _periodicUpdateTimer.Tick += PeriodicTick;
       DataContext = this;
     }
 
@@ -31,7 +38,7 @@ namespace SynologyWP.Inlays
 
     public void Flush()
     {
-      _entryList.Clear();
+      _periodicUpdateTimer.Stop();
     }
 
     public async Task Refresh()
@@ -42,56 +49,111 @@ namespace SynologyWP.Inlays
       {
         timeline_group_unit = "day"
       });
+
+      _groupedItems = _timeline.section.SelectMany(s => s.list)
+        .SelectMany(s =>
+        {
+          var a = new List<Photo>();
+          for (int i = 0; i < s.item_count; i++) a.Add(new Photo(this, _app.Client) { Section = s });
+          return a;
+        }
+        )
+      .GroupBy(s => s.Month)
+      .OrderByDescending(s => s.Key)
+      .ToList();
+
+      groupedPhotosByMonth.Source = _groupedItems;
+      Months.ItemsSource = groupedPhotosByMonth.View.CollectionGroups;
+
       _filter = await _app.Client.GetAsync<API.Commands.SYNO.FotoTeam.Search.FilterListResult>(new API.Commands.SYNO.FotoTeam.Search.FilterList()
       {
         additional = "[\"thumbnail\"]",
         setting = "{\"item_type\":true,\"time\":true,\"geocoding\":true}",
       });
 
-      _mainPage?.EndLoading();
+      _periodicUpdateTimer.Start();
 
-      _entryList = new List<API.Commands.SYNO.FotoTeam.Browse.Entry>();
-      for (int i = 0; i < 3; i++)
-      {
-        foreach (var item in _timeline.section[i].list)
-        {
-          LoadSection(item);
-        }
-      }
+      _mainPage?.EndLoading();
     }
 
-    private async void LoadSection(API.Commands.SYNO.FotoTeam.Browse.Item sectionItem)
+    private void EnqueueSectionLoad(API.Commands.SYNO.FotoTeam.Browse.Item section)
     {
-      _mainPage?.StartLoading();
+      if (_enqueuedSections.Contains(section) || _loadedSections.Contains(section))
+      {
+        return;
+      }
+      _enqueuedSections.Add(section);
+    }
 
-      var time = _filter.time.First(s => s.year == sectionItem.year && s.month == sectionItem.month);
+    private void PeriodicTick(object sender, object e)
+    {
+      if (_task != null && !_task.IsCompleted)
+      {
+        return;
+      }
+      _task = Task.Run((Action)ProcessSectionLoadQueueAsync);
+    }
+
+    private async void ProcessSectionLoadQueueAsync()
+    {
+      await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, async () =>
+      {
+        _mainPage?.StartLoading();
+
+        var sections = _enqueuedSections.ToList();
+        foreach (var section in sections)
+        {
+          await LoadSection(section);
+          _loadedSections.Add(section);
+        }
+        _enqueuedSections.Clear();
+
+        _mainPage?.EndLoading();
+      });
+    }
+
+    private async Task LoadSection(API.Commands.SYNO.FotoTeam.Browse.Item sectionItem)
+    {
+      var times = _filter.time.Where(s => s.year == sectionItem.year && s.month == sectionItem.month);
+      var startTime = API.Helpers.DateTimeToUnixTimeStamp(new DateTime(sectionItem.year, sectionItem.month, sectionItem.day, 0, 0, 0).ToLocalTime());
+      var endTime = API.Helpers.DateTimeToUnixTimeStamp(new DateTime(sectionItem.year, sectionItem.month, sectionItem.day, 23, 59, 59).ToLocalTime());
 
       var items = await _app.Client.GetAsync<API.Commands.SYNO.FotoTeam.Browse.ItemListResult>(new API.Commands.SYNO.FotoTeam.Browse.ItemList()
       {
         offset = 0,
         limit = sectionItem.item_count,
-        start_time = time.start_time,
-        end_time = time.end_time,
+        start_time = startTime,
+        end_time = endTime,
         additional = "[\"thumbnail\",\"video_meta\"]",
       });
 
-      _entryList.AddRange(items.list.Where(s=>!_entryList.Any(t=>t.id==s.id)));
+      foreach (var item in items.list)
+      {
+        var day = string.Format($"{sectionItem.year:D4}-{sectionItem.month:D2}-{sectionItem.day:D2}");
+        var month = day.Substring(0, 7);
+        var group = _groupedItems?.FirstOrDefault(s => s.Key == month);
 
-      groupedPhotosByMonth.Source = _entryList
-        .Select(s => new Photo(_app.Client)
+        Photo photo = null;
+        photo = group.FirstOrDefault(s => s.ID == item.id);
+        if (photo == null)
         {
-          ID = s.id,
-          Name = s.filename,
-          IsVideo = s.type == "video",
-          VideoLengthMS = s.additional?.video_meta?.duration ?? 0,
-          Month = API.Helpers.UnixTimeStampToDateTime(s.time).ToLocalTime().ToString("yyyy-MM"),
-          CacheKey = s.additional.thumbnail.cache_key,
-        })
-        .GroupBy(s => s.Month)
-        .OrderByDescending(s => s.Key);
-      Months.ItemsSource = groupedPhotosByMonth.View.CollectionGroups;
+          photo = group?.FirstOrDefault(s => s.ID == 0 && s.DateString == day);
+          if (photo == null)
+          {
+            continue;
+          }
+        }
 
-      _mainPage?.EndLoading();
+        photo.ID = item.id;
+        photo.Name = item.filename;
+        photo.IsVideo = item.type == "video";
+        photo.VideoLengthMS = item.additional?.video_meta?.duration ?? 0;
+        photo.CacheKey = item.additional.thumbnail.cache_key;
+
+        photo.OnPropertyChanged("IsVideo");
+        photo.OnPropertyChanged("VideoLengthString");
+        photo.OnPropertyChanged("ImageURLThumb");
+      }
     }
 
     private void Image_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
@@ -121,21 +183,30 @@ namespace SynologyWP.Inlays
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    public class Photo
+    public class Photo : INotifyPropertyChanged
     {
       API.Client _client;
+      PhotosInlay _inlay;
 
-      public Photo(API.Client client) { _client = client; }
+      public Photo(PhotosInlay inlay, API.Client client) { _inlay = inlay; _client = client; }
       public int ID { get; set; }
       public string Name { get; set; }
-      public string Month { get; set; }
+      public string Month => string.Format($"{Section.year:D4}-{Section.month:D2}");
+      public string DateString => string.Format($"{Section.year:D4}-{Section.month:D2}-{Section.day:D2}");
+      public API.Commands.SYNO.FotoTeam.Browse.Item Section { get; set; }
       public string CacheKey { get; set; }
       public bool IsVideo { get; set; }
-      public string VideoLengthString => $"{VideoLengthMS/60000}:{VideoLengthMS/1000:D2}";
+      public string VideoLengthString => $"{VideoLengthMS / 60000}:{VideoLengthMS / 1000:D2}";
       public int VideoLengthMS { get; set; }
       public string ImageURLThumb => ImageURL("sm");
       public string ImageURL(string size)
       {
+        if (ID == 0)
+        {
+          _inlay.EnqueueSectionLoad(Section);
+          return null;
+        }
+
         var url = _client.Settings.CurrentCredential.URL;
         url += "/synofoto/api/v2/t/Thumbnail/get";
 
@@ -159,6 +230,18 @@ namespace SynologyWP.Inlays
             item_id = $"[{ID}]"
           });
         }
+      }
+
+
+      public event PropertyChangedEventHandler PropertyChanged;
+
+      /// <summary>
+      /// Raises this object's PropertyChanged event.
+      /// </summary>
+      /// <param name="propertyName">The property that has a new value.</param>
+      public virtual void OnPropertyChanged(string propertyName)
+      {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
       }
     }
   }

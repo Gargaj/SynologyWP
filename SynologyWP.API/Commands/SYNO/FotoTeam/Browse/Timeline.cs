@@ -12,6 +12,7 @@ namespace SynologyWP.API.Commands.SYNO.FotoTeam.Browse
     public string timeline_group_unit { get; set; }
   }
 
+  [System.Diagnostics.DebuggerDisplay("date={year}-{month}-{day} count={item_count}")]
   public class Item
   {
     public int day;
