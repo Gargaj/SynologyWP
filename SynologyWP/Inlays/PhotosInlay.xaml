@@ -21,7 +21,7 @@
         <GridView x:Name="Months" SelectionMode="None" HorizontalAlignment="Center" Padding="0">
           <GridView.ItemTemplate>
             <DataTemplate>
-              <TextBlock Text="{Binding Group.Key}" Width="96" FontSize="22" Margin="15" Foreground="{ThemeResource SystemControlHighlightAccentBrush}" TextAlignment="Center"/>
+              <TextBlock Text="{Binding Group.Key}" Width="90" FontSize="22" Margin="15" Foreground="{ThemeResource SystemControlHighlightAccentBrush}" TextAlignment="Center"/>
             </DataTemplate>
           </GridView.ItemTemplate>
           <GridView.ItemsPanel>
