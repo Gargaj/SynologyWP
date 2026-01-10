@@ -40,14 +40,16 @@ namespace SynologyWP.Inlays
       _mainPage = _app.GetCurrentFrame<Pages.MainPage>();
       _mainPage?.StartLoading();
 
-      await UpdateSystemHealth();
-      await UpdateVolumeStatus();
-      await UpdateNotifications();
+      if (await UpdateSystemHealth())
+      {
+        await UpdateVolumeStatus();
+        await UpdateNotifications();
+      }
 
       _mainPage?.EndLoading();
     }
 
-    private async Task UpdateSystemHealth()
+    private async Task<bool> UpdateSystemHealth()
     {
       var health = await _app.Client.GetAsync<API.Commands.SYNO.Entry.RequestResult<API.Commands.SYNO.Core.System.SystemHealthResult>>(new API.Commands.SYNO.Entry.Request()
       {
@@ -56,10 +58,18 @@ namespace SynologyWP.Inlays
         compound = "[{\"api\":\"SYNO.Core.System.SystemHealth\",\"method\":\"get\",\"version\":1}]",
       });
 
+      if (health != null && health.has_fail && health.result[0].error.code == 119)
+      {
+        // We've been logged out
+        _app.NavigateToLoginScreen(string.Empty);
+        return false;
+      }
+
       MachineName = health?.result?.First()?.data?.hostname;
       OnPropertyChanged(nameof(MachineName));
       Uptime = health?.result?.First()?.data?.uptime;
       OnPropertyChanged(nameof(Uptime));
+      return true;
     }
 
     private async Task UpdateVolumeStatus()
@@ -69,7 +79,7 @@ namespace SynologyWP.Inlays
         type = "storage",
       });
 
-      Volumes = system.vol_info.Select(s => new Volume()
+      Volumes = system?.vol_info.Select(s => new Volume()
       {
         Name = s.name,
         TotalSize = s.total_size,

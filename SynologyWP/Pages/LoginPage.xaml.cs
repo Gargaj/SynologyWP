@@ -19,6 +19,8 @@ namespace SynologyWP.Pages
       _app = (App)Windows.UI.Xaml.Application.Current;
       DataContext = this;
 
+      Host = _app?.Client?.Settings?.CurrentCredential?.URL;
+
       OnPropertyChanged(nameof(Host));
       OnPropertyChanged(nameof(Handle));
       OnPropertyChanged(nameof(Password));
