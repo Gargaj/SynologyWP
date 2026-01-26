@@ -141,7 +141,7 @@ namespace SynologyWP.Inlays
     {
       _mainPage?.StartLoading();
 
-      if (!RecentlyAdded.Any())
+      if (RecentlyAdded == null || !RecentlyAdded.Any())
       {
         var result = await _app.Client.GetAsync<API.Commands.SYNO.AudioStation.AlbumListResult>(new API.Commands.SYNO.AudioStation.AlbumList()
         {
